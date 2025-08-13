@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "QuickScribe",
+    "slug": "quickscribe",
+    "scheme": "quickscribe",
+    "version": "1.0.0",
+    "ios": { "supportsTablet": true },
+    "android": { "adaptiveIcon": { "foregroundImage": "./assets/adaptive-icon.png" } },
+    "extra": { "apiBase": { "development": "http://10.0.2.2:8000", "production": "https://YOUR-REPLIT-URL" } }
+  }
+}
