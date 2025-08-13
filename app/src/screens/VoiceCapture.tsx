@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { View, Alert } from "react-native";
 import { Audio } from "expo-av";
 import { transcribeAsync, summarizeAsync } from "../api/client";
-import { insertSummary } from "../store/db";
+import { insertSummary, updateSummary } from "../store/db";
 import { nanoid } from "nanoid/non-secure";
 import { handleError, showSuccessToast } from "../utils/errorHandler";
 import { Button, Text, AnimatedView, Pulse, Card, CardContent } from "../components/ui";
@@ -127,36 +127,56 @@ export default function VoiceCapture({ navigation }: any) {
         return;
       }
 
-      setStatus("Transcribing...");
-      const { text } = await transcribeAsync(uri);
-      
-      if (!text.trim()) {
-        Alert.alert(
-          'No speech detected',
-          'We couldn\'t detect any speech in your recording. Please try again.',
-          [{ text: 'OK' }]
-        );
-        setRec(null);
-        setStatus("Idle");
-        setRecordingDuration(0);
-        return;
-      }
-
-      setStatus("Summarizing...");
-      const { summary } = await summarizeAsync(text, "medium", true);
+      // Save raw recording immediately for offline-first approach
       const id = nanoid();
-      insertSummary({ 
-        id, 
-        createdAt: Date.now(), 
-        title: "Voice note", 
-        medium: summary, 
-        sourceKind: "voice" 
-      });
+      const tempSummary = {
+        id,
+        createdAt: Date.now(),
+        title: "Voice note",
+        medium: "Processing...",
+        sourceKind: "voice",
+        sourceUri: uri,
+        rawContent: null,
+        isSynced: 0, // Mark as not synced yet
+      };
       
-      showSuccessToast("Voice note summarized successfully!");
+      // Insert temporary record first
+      insertSummary(tempSummary);
+
+      try {
+        setStatus("Transcribing...");
+        const { text } = await transcribeAsync(uri);
+        
+        if (!text.trim()) {
+          Alert.alert(
+            'No speech detected',
+            'We couldn\'t detect any speech in your recording. The voice note has been saved and will be processed when connection is restored.',
+            [{ text: 'OK' }]
+          );
+          navigation.replace("Summary", { id });
+          return;
+        }
+
+        setStatus("Summarizing...");
+        const { summary } = await summarizeAsync(text, "medium", true);
+        
+        // Update with processed summary and mark as synced
+        updateSummary(id, {
+          medium: summary,
+          rawContent: text,
+          isSynced: 1
+        });
+        
+        showSuccessToast("Voice note summarized successfully!");
+      } catch (error) {
+        // If processing fails, the note is still saved locally for later sync
+        console.log('Processing failed, will retry during sync:', error);
+        showSuccessToast("Voice note saved! Will be processed when connection is restored.");
+      }
+      
       navigation.replace("Summary", { id });
     } catch (error) {
-      handleError(error, 'Failed to process voice recording');
+      handleError(error, 'Failed to save voice recording');
     } finally {
       setRec(null);
       setStatus("Idle");
