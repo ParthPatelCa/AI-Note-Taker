@@ -1,17 +1,16 @@
-import { useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { AppState, AppStateStatus } from "react-native";
+import { StatusBar } from "expo-status-bar";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, AppState, AppStateStatus, StyleSheet, Text, View } from "react-native";
+import History from "./src/screens/History";
 import Home from "./src/screens/Home";
-import VoiceCapture from "./src/screens/VoiceCapture";
-import TextInputScreen from "./src/screens/TextInput";
 import ImageCapture from "./src/screens/ImageCapture";
 import Summary from "./src/screens/Summary";
-import History from "./src/screens/History";
-import { init } from "./src/store/db";
+import TextInputScreen from "./src/screens/TextInput";
+import VoiceCapture from "./src/screens/VoiceCapture";
 import { startNetworkListener, syncPendingNotes } from "./src/services/SyncService";
-import { ActivityIndicator, View, StyleSheet, Text } from "react-native";
-import { StatusBar } from "expo-status-bar";
+import { init } from "./src/store/db";
 
 // This is a simplified global loading state for demonstration.
 // In a real app, consider using React Context or a state management library.

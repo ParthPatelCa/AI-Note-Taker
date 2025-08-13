@@ -1,79 +1,50 @@
-🎯 Product Overview
-✨ Product Name (Placeholder)
+# Welcome to your Expo app 👋
 
-QuickScribe – “Turn spoken or written info into instant, shareable summaries.”
-🔑 Core Problem
+This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
-Users collect information from meetings, classes, calls, or brainstorming sessions—but they struggle to:
+## Get started
 
-    Organize it
+1. Install dependencies
 
-    Summarize it
+   ```bash
+   npm install
+   ```
 
-    Use it later
+2. Start the app
 
-They need a fast, distraction-free way to:
+   ```bash
+   npx expo start
+   ```
 
-    Capture input (voice, text, image)
+In the output, you'll find options to open the app in a
 
-    Summarize with AI
+- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
+- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
+- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
+- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
 
-    Store + share actionable insights
+You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
-🧪 MVP Feature Set (Lean Version)
-Category	Feature	Notes
-Input Capture	🎙️ Record voice/audio	Simple recorder with pause/resume
-	📝 Paste or type raw text	For email summaries, lecture notes, etc.
-	📷 Upload image (whiteboard or slide)	Optional OCR integration (Tesseract or iOS Vision)
-Summarization	✂️ Summarize input using GPT	3 levels: short (TL;DR), medium, full
-	✅ Action items (checklist generation)	AI detects tasks, follow-ups
-Storage/Export	📥 Save to local or iCloud	Offline-first option for privacy
-	📤 Export to Apple Notes, Notion, or email	Via Share Sheet
-Extras (Optional MVP+)	📅 Link with Calendar or title notes by date	e.g. “Meeting with James – Aug 13”
-	🔍 Search past summaries	Lightweight keyword search
-🧰 Tech Stack
-Layer	Tool
-Transcription	Whisper API (or on-device)
-Summarization	OpenAI GPT-4o or Claude API
-OCR (optional)	iOS VisionKit / Tesseract
-Storage	CoreData, iCloud, or Firebase
-Framework	Swift + SwiftUI (native iOS)
-Exports	iOS Share Sheet integrations, Notion API (if needed)
-👤 Target User Personas
-User Type	Use Case
-🎓 Student	Summarizing lectures or study notes
-🧑‍💼 Knowledge worker	Meeting summaries, idea dumps
-🧑‍⚕️ Doctor/researcher	Dictating insights, summarizing findings
-📱 Creator	Transcribing brainstorms, podcast content
-🧘 Casual user	Summarizing books, articles, or voice memos
-📈 Monetization Plan
-Tier	Features
-Free	X mins of transcription/month, basic summaries
-Pro (~$5–$9/mo)	Unlimited input, advanced summary types (e.g. bullet point + action list), OCR uploads, Notion/Slack export
-Team License	For internal meeting summaries, manager sharing, integrations with calendars or task tools
-🛠 Validation Plan (Pre-Launch)
-Step	Action
-✅ Landing Page	Describe product, collect emails (tools: Carrd, Typedream)
-🧪 Waitlist Survey	Ask users what kind of notes they take & summarize
-📱 Figma Prototype	Clickable demo for early feedback
-👥 1:1 Interviews	With students, professionals, and power users
-🚀 Beta Test	Launch on TestFlight with small group of users
-🎨 UI/UX Sketch (Concept)
+## Get a fresh project
 
-    Home screen: “Start a new capture” – choose Voice / Text / Image
+When you're ready, run:
 
-    Live screen: Recording + real-time transcript
+```bash
+npm run reset-project
+```
 
-    Summary screen:
+This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
 
-        Short TL;DR
+## Learn more
 
-        Medium summary
+To learn more about developing your project with Expo, look at the following resources:
 
-        Checklist (if applicable)
+- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
+- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
 
-        Export/share/save buttons
+## Join the community
 
-    History screen: List of saved summaries
+Join our community of developers creating universal apps.
 
-Want me to mock up a Figma UI, help write copy for a landing page, or sketch out user flows for MVP dev?
+- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
+- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
