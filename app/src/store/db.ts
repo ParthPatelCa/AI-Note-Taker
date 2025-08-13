@@ -21,6 +21,10 @@ export function insertSummary(s: any) {
   );
 }
 
+export function getSummary(id: string) {
+  return db.getFirstSync("SELECT * FROM summaries WHERE id = ?", [id]);
+}
+
 export function listSummaries(q?: string) {
   if (q) {
     return db.getAllSync(
@@ -29,4 +33,8 @@ export function listSummaries(q?: string) {
     );
   }
   return db.getAllSync("SELECT * FROM summaries ORDER BY createdAt DESC");
+}
+
+export function deleteSummary(id: string) {
+  db.runSync("DELETE FROM summaries WHERE id = ?", [id]);
 }
