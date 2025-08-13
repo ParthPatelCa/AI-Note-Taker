@@ -3,7 +3,7 @@ import { View, TextInput as RNTextInput, Alert, Keyboard } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { summarizeAsync } from "../api/client";
-import { insertSummary } from "../store/db";
+import { insertSummary, updateSummary } from "../store/db";
 import { nanoid } from "nanoid/non-secure";
 import { handleError, showSuccessToast } from "../utils/errorHandler";
 import { Button, Text, AnimatedView, Card, CardContent, Badge } from "../components/ui";
@@ -125,26 +125,47 @@ export default function TextInputScreen({ navigation }: any) {
 
     try {
       Keyboard.dismiss();
-      setStatus("Summarizing...");
+      setStatus("Saving...");
       
-      const { summary } = await summarizeAsync(value, "medium", true);
+      // Save raw text immediately for offline-first approach
       const id = nanoid();
+      const tempSummary = {
+        id,
+        createdAt: Date.now(),
+        title: value.slice(0, 40) || "Text note",
+        medium: "Processing...",
+        sourceKind: "text",
+        sourceUri: null,
+        rawContent: value,
+        isSynced: 0, // Mark as not synced yet
+      };
       
-      await insertSummary({ 
-        id, 
-        createdAt: Date.now(), 
-        title: value.slice(0, 40) || "Text note", 
-        medium: summary, 
-        sourceKind: "text" 
-      });
+      // Insert temporary record first
+      await insertSummary(tempSummary);
       
-      // Clear draft after successful processing
+      try {
+        setStatus("Summarizing...");
+        const { summary } = await summarizeAsync(value, "medium", true);
+        
+        // Update with processed summary and mark as synced
+        await updateSummary(id, {
+          medium: summary,
+          isSynced: 1
+        });
+        
+        showSuccessToast("Text note summarized successfully!");
+      } catch (error) {
+        // If processing fails, the note is still saved locally for later sync
+        console.log('Processing failed, will retry during sync:', error);
+        showSuccessToast("Text note saved! Will be processed when connection is restored.");
+      }
+      
+      // Clear draft after successful save
       await clearDraft();
       
-      showSuccessToast("Text note summarized successfully!");
       navigation.replace("Summary", { id });
     } catch (error) {
-      handleError(error, "Failed to summarize text note");
+      handleError(error, "Failed to save text note");
       setStatus("Idle");
     }
   };

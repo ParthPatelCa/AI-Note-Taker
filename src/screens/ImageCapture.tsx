@@ -2,7 +2,7 @@ import * as ImagePicker from "expo-image-picker";
 import { View, Alert, Dimensions, Image } from "react-native";
 import { useState, useEffect } from "react";
 import { ocrAsync, summarizeAsync } from "../api/client";
-import { insertSummary } from "../store/db";
+import { insertSummary, updateSummary } from "../store/db";
 import { nanoid } from "nanoid/non-secure";
 import { handleError, showSuccessToast } from "../utils/errorHandler";
 import { Button, Text, AnimatedView, Card, CardContent, Badge } from "../components/ui";
@@ -63,10 +63,6 @@ export default function ImageCapture({ navigation }: any) {
     
     return warnings;
   };
-
-export default function ImageCapture({ navigation }: any) {
-  const [uri, setUri] = useState<string | null>(null);
-  const [status, setStatus] = useState("Idle");
 
   const pickFromGallery = async () => {
     if (!hasPermission) {
@@ -147,46 +143,56 @@ export default function ImageCapture({ navigation }: any) {
     }
 
     try {
-      setStatus("Extracting text...");
-      const { text } = await ocrAsync(uri);
-
-      if (!text || text.trim().length < 10) {
-        Alert.alert(
-          'No Text Found',
-          'We couldn\'t extract enough readable text from this image. Please try:\n\n• Taking a clearer photo\n• Ensuring good lighting\n• Making sure text is visible and not blurry',
-          [
-            { text: 'Try Again', onPress: () => setStatus("Idle") },
-            { text: 'Process Anyway', onPress: () => continueProcessing(text) }
-          ]
-        );
-        return;
-      }
-
-      await continueProcessing(text);
-    } catch (error) {
-      handleError(error, "Failed to process image");
-      setStatus("Idle");
-    }
-  };
-
-  const continueProcessing = async (text: string) => {
-    try {
-      setStatus("Summarizing...");
-      const { summary } = await summarizeAsync(text || "No text found in image", "medium", true);
-
+      // Save raw image immediately for offline-first approach
       const id = nanoid();
-      await insertSummary({ 
-        id, 
-        createdAt: Date.now(), 
-        title: "Image note", 
-        medium: summary, 
-        sourceKind: "image" 
-      });
+      const tempSummary = {
+        id,
+        createdAt: Date.now(),
+        title: "Image note",
+        medium: "Processing...",
+        sourceKind: "image",
+        sourceUri: uri,
+        rawContent: null,
+        isSynced: 0, // Mark as not synced yet
+      };
       
-      showSuccessToast("Image note processed successfully!");
+      // Insert temporary record first
+      await insertSummary(tempSummary);
+
+      try {
+        setStatus("Extracting text...");
+        const { text } = await ocrAsync(uri);
+
+        if (!text || text.trim().length < 10) {
+          Alert.alert(
+            'No Text Found',
+            'We couldn\'t extract enough readable text from this image. The image has been saved and will be processed when connection is restored.',
+            [{ text: 'OK' }]
+          );
+          navigation.replace("Summary", { id });
+          return;
+        }
+
+        setStatus("Summarizing...");
+        const { summary } = await summarizeAsync(text, "medium", true);
+
+        // Update with processed summary and mark as synced
+        await updateSummary(id, {
+          medium: summary,
+          rawContent: text,
+          isSynced: 1
+        });
+        
+        showSuccessToast("Image note processed successfully!");
+      } catch (error) {
+        // If processing fails, the note is still saved locally for later sync
+        console.log('Processing failed, will retry during sync:', error);
+        showSuccessToast("Image saved! Will be processed when connection is restored.");
+      }
+      
       navigation.replace("Summary", { id });
     } catch (error) {
-      handleError(error, "Failed to process image note");
+      handleError(error, "Failed to save image");
       setStatus("Idle");
     }
   };
